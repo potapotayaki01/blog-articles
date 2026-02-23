@@ -5,13 +5,14 @@ on:
     types: [created]
   pull_request_review_comment:
     types: [created]
+  issues:
+    types: [opened, assigned]
   pull_request_review:
     types: [submitted]
-  issues:
-    types: [opened, edited]   # assigned より edited の方が自然（本文に@claudeを入れた時に反応）
 
 jobs:
   claude-code-action:
+    # @claude が含まれるコメントの時だけ実行
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -24,7 +25,6 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      actions: read
       id-token: write
 
     steps:
@@ -37,5 +37,3 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          branch_prefix: "claude-"
-          show_full_output: true
